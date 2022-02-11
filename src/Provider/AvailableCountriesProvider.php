@@ -28,8 +28,12 @@ class AvailableCountriesProvider implements AvailableCountriesProviderInterface
         /** @var ChannelInterface $channel */
         $channel = $this->channelContext->getChannel();
 
-        $channelCountries = $channel->getCountries()->toArray();
-
+        // make below support v1.5
+        if (method_exists($channel, 'getCountries'))
+            $channelCountries = $channel->getCountries()->toArray(); // version >= 1.7
+        else
+            $channelCountries = []; // skip it
+        
         if (count($channelCountries)) {
             return $this->convertToStringArray($channelCountries);
         }
