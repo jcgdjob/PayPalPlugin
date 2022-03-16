@@ -66,7 +66,7 @@ final class CreateOrderApi implements CreateOrderApiInterface
             'purchase_units' => [
                 [
                     'reference_id' => $referenceId,
-                    'invoice_number' => $this->paymentReferenceNumberProvider->provide($payment),
+                    'invoice_id' => $this->paymentReferenceNumberProvider->provide($payment),
                     'amount' => [
                         'currency_code' => $order->getCurrencyCode(),
                         'value' => (int) $payment->getAmount() / 100,

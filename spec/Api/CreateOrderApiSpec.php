@@ -91,7 +91,7 @@ final class CreateOrderApiSpec extends ObjectBehavior
             Argument::that(function (array $data): bool {
                 return
                     $data['intent'] === 'CAPTURE' &&
-                    $data['purchase_units'][0]['invoice_number'] === 'REFERENCE-NUMBER' &&
+                    $data['purchase_units'][0]['invoice_id'] === 'REFERENCE-NUMBER' &&
                     $data['purchase_units'][0]['amount']['value'] === 100 &&
                     $data['purchase_units'][0]['amount']['currency_code'] === 'PLN' &&
                     $data['purchase_units'][0]['amount']['breakdown']['shipping']['currency_code'] === 'PLN' &&
@@ -165,7 +165,7 @@ final class CreateOrderApiSpec extends ObjectBehavior
             Argument::that(function (array $data): bool {
                 return
                     $data['intent'] === 'CAPTURE' &&
-                    $data['purchase_units'][0]['invoice_number'] === 'REFERENCE-NUMBER' &&
+                    $data['purchase_units'][0]['invoice_id'] === 'REFERENCE-NUMBER' &&
                     $data['purchase_units'][0]['amount']['value'] === 100 &&
                     $data['purchase_units'][0]['amount']['currency_code'] === 'PLN' &&
                     $data['purchase_units'][0]['shipping']['name']['full_name'] === 'Gandalf The Grey' &&
