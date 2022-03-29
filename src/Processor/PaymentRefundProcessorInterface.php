@@ -12,5 +12,5 @@ interface PaymentRefundProcessorInterface
     /**
      * @throws PayPalOrderRefundException
      */
-    public function refund(PaymentInterface $payment): void;
+    public function refund(PaymentInterface $payment, $amount = -1): void;
 }

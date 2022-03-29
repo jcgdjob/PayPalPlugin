@@ -56,7 +56,7 @@ final class PayPalPaymentRefundProcessor implements PaymentRefundProcessorInterf
         $this->refundReferenceNumberProvider = $refundReferenceNumberProvider;
     }
 
-    public function refund(PaymentInterface $payment): void
+    public function refund(PaymentInterface $payment, $amount = -1): void
     {
         /** @var PaymentMethodInterface $paymentMethod */
         $paymentMethod = $payment->getMethod();
@@ -75,6 +75,9 @@ final class PayPalPaymentRefundProcessor implements PaymentRefundProcessorInterf
         /** @var OrderInterface $order */
         $order = $payment->getOrder();
 
+        if ($amount <= -1)
+            $amount = $payment->getAmount();///100;
+
         try {
             $token = $this->authorizeClientApi->authorize($paymentMethod);
             $details = $this->orderDetailsApi->get($token, (string) $details['paypal_order_id']);
@@ -87,7 +90,7 @@ final class PayPalPaymentRefundProcessor implements PaymentRefundProcessorInterf
                 $payPalPaymentId,
                 $authAssertion,
                 $referenceNumber,
-                (string) (((int) $payment->getAmount()) / 100),
+                (string) (((int) $amount) / 100),
                 (string) $order->getCurrencyCode()
             );
         } catch (ClientException | \InvalidArgumentException $exception) {

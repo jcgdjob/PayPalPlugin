@@ -23,5 +23,6 @@ final class PaymentReferenceNumberProvider implements PaymentReferenceNumberProv
         $creationDate = $payment->getCreatedAt();
 
         return ((string) $payment->getId()) . '-' . $creationDate->format('d-m-Y');
+        //return ((string) $payment->getOrderId()) . '-' . ((string) $payment->getId());
     }
 }
