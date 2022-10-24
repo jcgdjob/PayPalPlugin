@@ -27,15 +27,17 @@ final class UiPayPalPaymentRefundProcessor implements PaymentRefundProcessorInte
         $this->paymentRefundProcessor = $paymentRefundProcessor;
     }
 
-    public function refund(PaymentInterface $payment, $amount = -1): void
+    public function refund(PaymentInterface $payment, $amount = -1): array
     {
         if ($amount <= -1)
             $amount = $payment->getAmount();///100;
 
         try {
-            $this->paymentRefundProcessor->refund($payment, $amount);
+            return $this->paymentRefundProcessor->refund($payment, $amount);
         } catch (PayPalOrderRefundException $exception) {
             throw new UpdateHandlingException($exception->getMessage());
         }
+
+        return ['error'=>'UiPayPalPaymentRefundProcessor'];
     }
 }

@@ -33,11 +33,51 @@ final class RefundPaymentApi implements RefundPaymentApiInterface
         string $amount,
         string $currencyCode
     ): array {
-        return $this->client->post(
+        $response = $this->client->post(
             sprintf('v2/payments/captures/%s/refund', $paymentId),
             $token,
             ['amount' => ['value' => $amount, 'currency_code' => $currencyCode], 'invoice_id' => $invoiceNumber],
             ['PayPal-Auth-Assertion' => $payPalAuthAssertion]
         );
+
+
+
+        if (isset($response['id'])) {
+            $r = $this->client->get(
+                sprintf('v2/payments/refunds/%s', $response['id']),
+                $token
+            );
+        }
+
+        $result = [];
+
+        if (isset($response['details'][0]['description']))
+            $result['error'] = $response['details'][0]['description'];
+
+        if (isset($response['id']))
+            $result['id'] = $response['id'];
+
+        if (isset($response['status']))
+            $result['status'] = $response['status'];
+
+
+        if (isset($r['id'])) {
+            $result['refund']['id'] = $r['id'];
+
+            //update to server time on accounts__movements table
+            $payment_date = new \DateTimeImmutable($r['update_time']);
+            $payment_date = new \DateTime( $payment_date->format('Y-m-d H:i:s') , new \DateTimeZone(date_default_timezone_get()));
+            $payment_date = gmdate('Y-m-d H:i:s', (int)$payment_date->format('U'));
+            $payment_date = addslashes($payment_date);
+
+            $result['refund']['update_time'] = $payment_date;
+
+            
+            if (isset($r['seller_payable_breakdown']))
+                $result['refund']['seller_payable_breakdown'] = $r['seller_payable_breakdown'];
+        }
+     
+        return $result;
+
     }
 }

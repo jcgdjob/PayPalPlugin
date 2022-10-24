@@ -56,7 +56,7 @@ final class PayPalPaymentRefundProcessor implements PaymentRefundProcessorInterf
         $this->refundReferenceNumberProvider = $refundReferenceNumberProvider;
     }
 
-    public function refund(PaymentInterface $payment, $amount = -1): void
+    public function refund(PaymentInterface $payment, $amount = -1): array
     {
         /** @var PaymentMethodInterface $paymentMethod */
         $paymentMethod = $payment->getMethod();
@@ -64,12 +64,12 @@ final class PayPalPaymentRefundProcessor implements PaymentRefundProcessorInterf
         $gatewayConfig = $paymentMethod->getGatewayConfig();
 
         if ($gatewayConfig->getFactoryName() !== 'sylius.pay_pal') {
-            return;
+            return ['error'=>'Missing gatewayConfig'];
         }
 
         $details = $payment->getDetails();
         if (!isset($details['paypal_order_id'])) {
-            return;
+            return ['error'=>'Missing paypal_order_id'];
         }
 
         /** @var OrderInterface $order */
@@ -93,8 +93,12 @@ final class PayPalPaymentRefundProcessor implements PaymentRefundProcessorInterf
                 (string) (((int) $amount) / 100),
                 (string) $order->getCurrencyCode()
             );
+
+            return $response;
+
         } catch (ClientException | \InvalidArgumentException $exception) {
             throw new PayPalOrderRefundException();
         }
+        return ['error'=>'Paypal Commerce refund exception'];
     }
 }
