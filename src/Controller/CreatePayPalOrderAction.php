@@ -40,10 +40,10 @@ final class CreatePayPalOrderAction
     private $capturePaymentResolver;
 
     public function __construct(
-        Payum $payum,
-        OrderRepositoryInterface $orderRepository,
-        FactoryInterface $stateMachineFactory,
-        ObjectManager $paymentManager,
+        ?Payum $payum,
+        ?OrderRepositoryInterface $orderRepository,
+        ?FactoryInterface $stateMachineFactory,
+        ?ObjectManager $paymentManager,
         PaymentStateManagerInterface $paymentStateManager,
         OrderProviderInterface $orderProvider,
         CapturePaymentResolverInterface $capturePaymentResolver

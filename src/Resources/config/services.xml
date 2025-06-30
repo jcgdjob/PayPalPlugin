@@ -134,6 +134,7 @@
 
         <service id="Sylius\PayPalPlugin\Processor\PayPalOrderCompleteProcessor" public="true">
             <argument type="service" id="Sylius\PayPalPlugin\Manager\PaymentStateManagerInterface" />
+            <argument type="service" id="sylius_paypal.verifier.payment_amount" />
         </service>
 
         <service
@@ -271,5 +272,8 @@
         <service id="Sylius\PayPalPlugin\Twig\OrderAddressExtension">
             <tag name="twig.extension" />
         </service>
+
+        <service id="sylius_paypal.verifier.payment_amount" class="Sylius\PayPalPlugin\Verifier\PaymentAmountVerifier" />
+        <service id="Sylius\PayPalPlugin\Verifier\PaymentAmountVerifierInterface" alias="sylius_paypal.verifier.payment_amount" />
     </services>
 </container>

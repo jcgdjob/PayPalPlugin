@@ -37,7 +37,7 @@ final class CreatePayPalOrderFromPaymentPageAction
 
     public function __construct(
         FactoryInterface $stateMachineFactory,
-        ObjectManager $paymentManager,
+        ?ObjectManager $paymentManager,
         PaymentStateManagerInterface $paymentStateManager,
         OrderProviderInterface $orderProvider,
         CapturePaymentResolverInterface $capturePaymentResolver

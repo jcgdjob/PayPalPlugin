@@ -20,12 +20,15 @@ use Sylius\Component\Core\Model\OrderInterface;
 use Sylius\Component\Core\Model\PaymentInterface;
 use Sylius\Component\Core\Model\PaymentMethodInterface;
 use Sylius\PayPalPlugin\Manager\PaymentStateManagerInterface;
+use Sylius\PayPalPlugin\Verifier\PaymentAmountVerifierInterface;
 
 final class PayPalOrderCompleteProcessorSpec extends ObjectBehavior
 {
-    function let(PaymentStateManagerInterface $paymentStateManager): void
-    {
-        $this->beConstructedWith($paymentStateManager);
+    function let(
+        PaymentStateManagerInterface $paymentStateManager,
+        PaymentAmountVerifierInterface $paymentAmountVerifier
+    ): void {
+        $this->beConstructedWith($paymentStateManager, $paymentAmountVerifier);
     }
 
     function it_completes_pay_pal_order(
@@ -33,7 +36,8 @@ final class PayPalOrderCompleteProcessorSpec extends ObjectBehavior
         OrderInterface $order,
         PaymentInterface $payment,
         PaymentMethodInterface $paymentMethod,
-        GatewayConfigInterface $gatewayConfig
+        GatewayConfigInterface $gatewayConfig,
+        PaymentAmountVerifierInterface $paymentAmountVerifier
     ): void {
         $order->getLastPayment(PaymentInterface::STATE_PROCESSING)->willReturn($payment);
 
@@ -41,6 +45,7 @@ final class PayPalOrderCompleteProcessorSpec extends ObjectBehavior
         $paymentMethod->getGatewayConfig()->willReturn($gatewayConfig);
         $gatewayConfig->getFactoryName()->willReturn('sylius.pay_pal');
 
+        $paymentAmountVerifier->verify($payment)->shouldBeCalled();
         $paymentStateManager->complete($payment)->shouldBeCalled();
 
         $this->completePayPalOrder($order);

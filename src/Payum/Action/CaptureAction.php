@@ -63,6 +63,7 @@ final class CaptureAction implements ActionInterface
                 'status' => StatusAction::STATUS_CAPTURED,
                 'paypal_order_id' => $content['id'],
                 'reference_id' => $referenceId,
+                'payment_amount' => $payment->getAmount(),
             ]);
         }
     }

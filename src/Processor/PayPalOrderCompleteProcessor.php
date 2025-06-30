@@ -8,16 +8,31 @@ use Sylius\Bundle\PayumBundle\Model\GatewayConfigInterface;
 use Sylius\Component\Core\Model\OrderInterface;
 use Sylius\Component\Core\Model\PaymentInterface;
 use Sylius\Component\Core\Model\PaymentMethodInterface;
+use Sylius\PayPalPlugin\Exception\PaymentAmountMismatchException;
 use Sylius\PayPalPlugin\Manager\PaymentStateManagerInterface;
+use Sylius\PayPalPlugin\Verifier\PaymentAmountVerifierInterface;
 
 final class PayPalOrderCompleteProcessor
 {
-    /** @var PaymentStateManagerInterface */
     private $paymentStateManager;
+    private $paymentAmountVerifier = null;
 
-    public function __construct(PaymentStateManagerInterface $paymentStateManager)
-    {
+    /** @var PaymentStateManagerInterface */
+     public function __construct(
+        PaymentStateManagerInterface $paymentStateManager,
+        ?PaymentAmountVerifierInterface $paymentAmountVerifier = null
+    ) {
         $this->paymentStateManager = $paymentStateManager;
+        $this->paymentAmountVerifier = $paymentAmountVerifier;
+
+        if (null === $this->paymentAmountVerifier) {
+            trigger_deprecation(
+                'sylius/paypal-plugin',
+                '1.6',
+                'Not passing an instance of "%s" as the second argument is deprecated and will be prohibited in 3.0.',
+                PaymentAmountVerifierInterface::class,
+            );
+        }
     }
 
     public function completePayPalOrder(OrderInterface $order): void
@@ -36,6 +51,34 @@ final class PayPalOrderCompleteProcessor
             return;
         }
 
+        try {
+            if (null !== $this->paymentAmountVerifier) {
+                $this->paymentAmountVerifier->verify($payment);
+            } else {
+                $this->verify($payment);
+            }
+        } catch (PaymentAmountMismatchException $e) {
+            $this->paymentStateManager->cancel($payment);
+
+            return;
+        }
+
         $this->paymentStateManager->complete($payment);
+    }
+
+    private function verify(PaymentInterface $payment): void
+    {
+        $totalAmount = $this->getTotalPaymentAmountFromPaypal($payment);
+
+        if ($payment->getOrder()->getTotal() !== $totalAmount) {
+            throw new PaymentAmountMismatchException();
+        }
+    }
+
+    private function getTotalPaymentAmountFromPaypal(PaymentInterface $payment): int
+    {
+        $details = $payment->getDetails();
+
+        return $details['payment_amount'] ?? 0;
     }
 }
